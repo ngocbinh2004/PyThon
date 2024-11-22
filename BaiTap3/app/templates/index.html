@@ -1,27 +1,18 @@
-{% extends "base.html" %} {% block title %}Trang Quản Lý Sách{% endblock %} {%
-block content %}
+{% extends "base.html" %}
+
+{% block title %}Trang Quản Lý Sách{% endblock %}
+
+{% block content %}
 <div class="card p-4 shadow-sm">
   <h2 class="h4 mb-4">Thêm sách mới</h2>
   <form method="POST" action="/">
     <div class="mb-3">
       <label for="title" class="form-label">Tên sách</label>
-      <input
-        type="text"
-        id="title"
-        name="title"
-        class="form-control"
-        required
-      />
+      <input type="text" id="title" name="title" class="form-control" required />
     </div>
     <div class="mb-3">
       <label for="author" class="form-label">Tác giả</label>
-      <input
-        type="text"
-        id="author"
-        name="author"
-        class="form-control"
-        required
-      />
+      <input type="text" id="author" name="author" class="form-control" required />
     </div>
     <div class="mb-3">
       <label for="genre" class="form-label">Thể loại</label>
@@ -40,13 +31,62 @@ block content %}
   <h2 class="h4 mb-4">Danh sách sách</h2>
   <ul class="list-group">
     {% for book in books %}
-    <li
-      class="list-group-item d-flex justify-content-between align-items-center"
-    >
-      <div>
-        <strong>{{ book.title }}</strong> - {{ book.author }}
-        <small class="text-muted">({{ book.genre }}, {{ book.year }})</small>
-      </div>
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <form method="POST" action="{{ url_for('main.edit_book', id=book.id) }}" class="w-100">
+        <div id="view-mode-{{ book.id }}" class="d-flex justify-content-between align-items-center">
+          <div>
+            <strong>{{ book.title }}</strong> - {{ book.author }}
+            <small class="text-muted">({{ book.genre }}, {{ book.year }})</small>
+          </div>
+          <div>
+            <!-- Nút chỉnh sửa -->
+            <button type="button" class="btn btn-warning btn-sm edit-btn" onclick="toggleEditMode({{ book.id }})">
+              Sửa
+            </button>
+            <!-- Nút xóa -->
+            <a href="{{ url_for('main.delete_book', id=book.id) }}" 
+               class="btn btn-danger btn-sm"
+               onclick="return confirm('Bạn có chắc chắn muốn xóa sách này không?');">
+              Xóa
+            </a>
+          </div>
+        </div>
+
+        <div id="edit-mode-{{ book.id }}" class="d-none">
+          <div class="mb-2">
+            <input type="text" name="title" class="form-control mb-2" value="{{ book.title }}" required />
+            <input type="text" name="author" class="form-control mb-2" value="{{ book.author }}" required />
+            <input type="text" name="genre" class="form-control mb-2" value="{{ book.genre }}" />
+            <input type="number" name="year" class="form-control mb-2" value="{{ book.year }}" />
+          </div>
+          <div class="d-flex justify-content-end">
+            <!-- Nút lưu chỉnh sửa -->
+            <button type="submit" class="btn btn-success btn-sm me-2">Lưu</button>
+            <!-- Nút hủy -->
+            <button type="button" class="btn btn-secondary btn-sm" onclick="toggleEditMode({{ book.id }}, true)">Hủy</button>
+          </div>
+        </div>
+      </form>
     </li>
+    {% endfor %}
   </ul>
 </div>
+
+<!-- JavaScript -->
+<script>
+  function toggleEditMode(bookId, cancel = false) {
+    const viewMode = document.getElementById(`view-mode-${bookId}`);
+    const editMode = document.getElementById(`edit-mode-${bookId}`);
+
+    if (cancel) {
+      // Quay lại chế độ xem
+      editMode.classList.add("d-none");
+      viewMode.classList.remove("d-none");
+    } else {
+      // Chuyển sang chế độ chỉnh sửa
+      editMode.classList.remove("d-none");
+      viewMode.classList.add("d-none");
+    }
+  }
+</script>
+{% endblock %}
